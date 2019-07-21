@@ -1,56 +1,195 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <title>CTB Productions</title>
-
-  <!-- Bootstrap core CSS -->
-  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
+	<title>Video Texture (Three.js)</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel=stylesheet href="css/base.css"/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<style>
+		a:link {
+  text-decoration: none;
+}
+</style>
 </head>
+<body>
 
-<body style="background-color:black;">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/106/three.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/Stats.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/THREEx.KeyboardState.js"></script>
+<script src="js/THREEx.FullScreen.js"></script>
+<script src="js/THREEx.WindowResize.js"></script>
 
-  <!-- Navigation -->
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+<script>
+/*
+	edits by alex ionkov (@aionkov)
+	based on
+	Three.js "tutorials by example"
+	Author: Lee Stemkoski
+	Date: July 2013 (three.js v59dev)
+*/
+	
+// MAIN
 
-  <center><a href="https://instagram.com/ctb_prod" class="navbar-left"><img src="ctb.png" style="width: 10%; height: 9%;"></a></center>
-<center><a href="https://instagram.com/alexanderakain" style="font-size:100px"><font color="white">@ALEXANDERAKAIN</font></a></center></div>
-<center><video width=90% controls autoplay playsinline autoplay muted loop>
-  <source src="kain.mp4" type="video/mp4">
-  Your browser does not support HTML5 video.
-</video></center>
-<center>
-<a href="https://open.spotify.com/artist/3spJW553jtlY6t5qEH778m"><img src="spotify.png" style="width: 120px; height: 120px;"></a>
-<a href="https://soundcloud.com/alexanderkain"><img src="soundcloud.png" style="width: 120px; height: 120px;"></a>
-<a href="https://www.youtube.com/channel/UCusaL343OlvfouqnMREWwKw"><img src="yt.png" style="width: 120px; height: 70px;"></a>
-</center>
-</body> 
-<nav class="navbar navbar-fixed-bottom">
-<a href="https://instagram.com/ctb_prod" style="font-size:80px"><font color="white">@ctb_prod</font></a>
-</nav>
-</html>
-  <!-- Page Content -->
-  <!--<section>
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6">
-          <h1 class="mt-5">The Big Picture</h1>
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt voluptates rerum eveniet sapiente repellat esse, doloremque quod recusandae deleniti nostrum assumenda vel beatae sed aut modi nesciunt porro quisquam voluptatem.</p>
-        </div>
-      </div>
-    </div>
-  </section>-->
+// standard global variables
+var container, scene, camera, renderer, controls, stats;
+var keyboard = new THREEx.KeyboardState();
 
-  <!-- Bootstrap core JavaScript -->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+// custom global variables
+var video, videoImage, videoImageContext, videoTexture;
+
+init();
+animate();
+
+// FUNCTIONS 		
+function init() 
+{
+	// SCENE
+	scene = new THREE.Scene();
+	// CAMERA
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(0,150,400);
+	camera.lookAt(scene.position);	
+	// RENDERER
+	if ( Detector.webgl )
+		renderer = new THREE.WebGLRenderer( {antialias:true} );
+	else
+		renderer = new THREE.CanvasRenderer(); 
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	container = document.getElementById( 'ThreeJS' );
+	container.appendChild( renderer.domElement );
+	// CONTROLS
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	// EVENTS
+	THREEx.WindowResize(renderer, camera);
+	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+	// LIGHT
+	var light = new THREE.PointLight(0xffffff);
+	light.position.set(0,250,0);
+	scene.add(light);
+	// SKYBOX/FOG
+	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+	// scene.add(skyBox);
+	scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
+	
+	///////////
+	// VIDEO //
+	///////////
+	
+	// create the video element
+	video = document.createElement( 'video' );
+	// video.id = 'video';
+	// video.type = ' video/ogg; codecs="theora, vorbis" ';
+	video.src = "videos/kain.mp4";
+	video.load(); // must call after setting/changing source
+	video.play();
+	
+	// alternative method -- 
+	// create DIV in HTML:
+	// <video id="myVideo" autoplay style="display:none">
+	//		<source src="videos/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
+	// </video>
+	// and set JS variable:
+	// video = document.getElementById( 'myVideo' );
+	
+	var texture = new THREE.TextureLoader().load( "videos/tv2.png" );
+	var crtMaterial = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide } );
+	// the geometry on which the movie will be displayed;
+	// 		movie image will be scaled to fit these dimensions.
+	var crtGeometry = new THREE.PlaneGeometry( 480, 430, 4, 4 );
+	var crtScreen = new THREE.Mesh( crtGeometry, crtMaterial );
+	crtScreen.position.set(30,125,-100);
+	scene.add(crtScreen);
+
+	videoImage = document.createElement( 'canvas' );
+	videoImage.width = 480;
+	videoImage.height = 204;
+
+	videoImageContext = videoImage.getContext( '2d' );
+	// background color if no video present
+	videoImageContext.fillStyle = '#000000';
+	videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
+
+	videoTexture = new THREE.Texture( videoImage );
+	videoTexture.minFilter = THREE.LinearFilter;
+	videoTexture.magFilter = THREE.LinearFilter;
+	
+	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
+	// the geometry on which the movie will be displayed;
+	// 		movie image will be scaled to fit these dimensions.
+	var movieGeometry = new THREE.PlaneGeometry( 220, 160, 4, 4 );
+	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
+	movieScreen.position.set(-5,130,-100);
+	scene.add(movieScreen);
+	
+	camera.position.set(0, -30, 500);
+	camera.lookAt(crtScreen.position);
+				
+	
+}
+
+function animate() 
+{
+    requestAnimationFrame( animate );
+	render();		
+	update();
+}
+
+function update()
+{
+	if ( keyboard.pressed("p") )
+		video.play();
+		
+	if ( keyboard.pressed("space") )
+		video.pause();
+
+	if ( keyboard.pressed("s") ) // stop video
+	{
+		video.pause();
+		video.currentTime = 0;
+	}
+	
+	if ( keyboard.pressed("r") ) // rewind video
+		video.currentTime = 0;
+	
+	controls.update();
+	stats.update();
+}
+
+function render() 
+{	
+	if ( video.readyState === video.HAVE_ENOUGH_DATA ) 
+	{
+		videoImageContext.drawImage( video, 0, 0 );
+		if ( videoTexture ) 
+			videoTexture.needsUpdate = true;
+	}
+
+	renderer.render( scene, camera );
+}
+
+</script>
+<div style="position: absolute; left:0px; top:50%">
+    <h1><font color="white">CHASE THE BAG PRODUCTIONS</font></h1>
+    <h2><font color="white">Tuning into <p style="color: #000000; background-color: #ffffff">Alexander Kain</p></font></h2>
+    <a href="https://soundcloud.com/alexanderkain" class="fa fa-soundcloud" style="font-size:40px;color:white;"></a>
+	<a href="https://open.spotify.com/artist/3spJW553jtlY6t5qEH778m" class="fa fa-spotify" style="font-size:40px;color:white;"></a>
+	<a href="https://www.youtube.com/channel/UCusaL343OlvfouqnMREWwKw" class="fa fa-youtube" style="font-size:40px;color:white;"></a>
+	<a href="https://itunes.apple.com/us/artist/alexander-kain/1339614845" class="fa fa-apple" style="font-size:40px;color:white;"></a>
+	<a href="https://www.instagram.com/alexanderakain/" class="fa fa-instagram" style="font-size:40px;color:white;"></a>
+</div>
+<div style="position: absolute; left:50%; top:5%">
+	<p style="color: #000000; background-color: #ffffff">current channel: ALEXANDERKAIN</p>
+	</div>
+
 
 </body>
-
 </html>
