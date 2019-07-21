@@ -86,9 +86,10 @@ function init()
 	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.id = 'video';
-	video.type = ' muted autoplay';
+	// video.id = 'video';
+	// video.type = ' video/ogg; codecs="theora, vorbis" ';
 	video.src = "videos/kain.mp4";
+	video.load(); // must call after setting/changing source
 	video.play();
 	
 	// alternative method -- 
