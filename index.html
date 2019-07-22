@@ -126,7 +126,9 @@ function init()
     video.addEventListener("ended", function() {
       if (!audio) {
         video.currentTime = 0;
+        video.playsinline = true;
         video.play();
+        video.playsinline = true;
       }
     }, true);
     video.addEventListener("error", function() {
@@ -146,7 +148,9 @@ function init()
         }
         once = true;
         start.style.display = "none";
+        video.playsinline = true;
         video.play();
+        video.playsinline = true;
       }
     }
 	//video.play();
@@ -246,7 +250,7 @@ function render()
 	<a href="https://www.instagram.com/alexanderakain/" class="fa fa-instagram" style="font-size:40px;color:white;"></a>
 </div>
 <div style="position: absolute; left:10%; top:3%">
-	<p style="color: #000000; background-color: #ffffff">click to play</p>
+	<p style="color: #000000; background-color: #ffffff">CLICK TO TURN ON</p>
 </div>
 <div style="position: absolute; left:50%; top:5%">
 	<p style="color: #000000; background-color: #ffffff">current channel: ALEXANDERKAIN</p>
