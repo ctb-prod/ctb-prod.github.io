@@ -150,7 +150,6 @@ function init()
         start.style.display = "none";
         video.playsinline = true;
         video.play();
-        video.playsinline = true;
       }
     }
 	//video.play();
@@ -208,6 +207,7 @@ function animate()
 
 function update()
 {
+	video.playsinline = true;
 	if ( keyboard.pressed("p") )
 		video.play();
 		
@@ -235,7 +235,7 @@ function render()
 		if ( videoTexture ) 
 			videoTexture.needsUpdate = true;
 	}
-
+	video.playsinline = true;
 	renderer.render( scene, camera );
 }
 
