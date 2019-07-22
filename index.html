@@ -118,17 +118,14 @@ function init()
 	// create the video element
 	video = document.createElement( 'video' );
 	video.src = "videos/kain.mp4";
-	video.type = 'autoplay muted loop';
+	video.type = 'autoplay muted loop playsinline';
 	video.playsinline = true;
 	video.addEventListener("playing", function() {
       copyVideo = true;
     }, true);
-    video.addEventListener("ended", function() {
+    video.addEventListener("pause", function() {
       if (!audio) {
-        video.currentTime = 0;
-        video.playsinline = true;
         video.play();
-        video.playsinline = true;
       }
     }, true);
     video.addEventListener("error", function() {
@@ -251,7 +248,7 @@ function render()
 	<a href="https://www.instagram.com/alexanderakain/" class="fa fa-instagram" style="font-size:40px;color:white;"></a>
 </div>
 <div style="position: absolute; left:10%; top:3%">
-	<p style="color: #000000; background-color: #ffffff">CLICK TO TURN ON</p>
+	<p style="color: #000000; background-color: #ffffff">TAP TO TURN ON</p>
 </div>
 <div style="position: absolute; left:50%; top:5%">
 	<p style="color: #000000; background-color: #ffffff">current channel: ALEXANDERKAIN</p>
